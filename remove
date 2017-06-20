@@ -1,0 +1,22 @@
+#!/bin/bash
+file='/home/xavier/.bashrc'
+line=$(grep -rn -w 'alias '$1 $file | cut -d : -f 1)
+
+if [ -z $1 ]
+then
+	echo -e "\e[31mplease input the alias you wish to remove\e[39m"
+else
+
+	cp .bashrc .bashkup
+
+	if [ -z $line ]
+	then
+		echo "no result found"
+	else
+		echo "alias found on line" $line
+		echo -e "\e[32malias "$1" has been removed\e[0m"
+		sed -i.bak -e $line'd' $file
+		exec bash
+	fi
+fi
+#cat $file

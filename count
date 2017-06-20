@@ -1,0 +1,19 @@
+#!/bin/bash
+echo $#
+
+if [ $1 = "-r" ]
+then
+	if [ -z $2 ]
+	then
+		find . | wc -l
+	else
+		find $2 | wc -l
+	fi
+else
+	if [ -z $1 ]
+	then
+		ls -alt | wc -l
+	else
+		ls -alt $1 | wc -l
+	fi
+fi

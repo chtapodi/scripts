@@ -1,0 +1,35 @@
+#!/bin/bash
+file=$HOME'/.bashrc'
+line=$(grep -rn -w 'alias '$1 $file | cut -d : -f 1)
+exist=$(grep -w 'alias '$1 $file)
+command="${@:2}"
+alias=$1
+
+
+if [ -z $1 ]
+then
+	echo -e "\e[31mformat is \e[33;1m<alias> <command>\e[0m"
+else
+	if [ -z $line ]
+	then
+		echo -e '\e[32mRunning "'$alias'" will call "'$command'"\e[0m'
+		echo 'alias' $alias'="'$command'"' >>~/.bashrc
+		exec bash
+
+	else
+		echo $1 "currently calls:"
+		echo $exist | grep -o '".*"' | tr -d '"'
+		echo "would you like to  overwrite with" $command "? (y/n)"
+		read overwrite
+		if [ $overwrite = y ]
+		then
+			sed -i.bak -e $line'd' $file
+			echo 'Running "'$alias'" will call "'$command'"'
+	                echo 'alias' $alias'="'$command'"' >>~/.bashrc
+                	exec bash
+
+		else
+			echo 'Running "'$alias'" will still call "'$exist | grep -o '".*"' | tr -d '"''"'
+		fi
+	fi
+fi
