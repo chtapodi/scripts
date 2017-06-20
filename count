@@ -1,19 +1,21 @@
 #!/bin/bash
-echo $#
 
-if [ $1 = "-r" ]
+if [[ $1 == "-r" ]]
 then
 	if [ -z $2 ]
 	then
-		find . | wc -l
+		count=$(find . | wc -l)
 	else
-		find $2 | wc -l
+		count=$(find $2 | wc -l)
 	fi
 else
 	if [ -z $1 ]
 	then
-		ls -alt | wc -l
+		count=$(ls -Al | wc -l)
 	else
-		ls -alt $1 | wc -l
+		count=$(ls -Al $1 | wc -l)
 	fi
 fi
+count=$(($count -1))
+
+echo $count
