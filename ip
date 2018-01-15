@@ -1,0 +1,7 @@
+#!/bin/bash
+ip=$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
+if ! grep -w $ip /.myip
+then
+	echo "New IP is" $ip | mutt -s "IP CHANGE" x.t.quinn@gmail.com
+	echo $ip > /.myip
+fi
