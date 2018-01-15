@@ -15,3 +15,11 @@ the -r flag will make the count recursive
 ## Remove
 
 This removes a given alias from the basrc file
+
+## Equiv
+
+A script for equalizing the files between two drives
+
+##IP
+
+This should send an email when the external IP address changes
