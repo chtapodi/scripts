@@ -29,5 +29,8 @@ Continuously retries ssh connection, great for when you are rebooting the device
 Counts the number of lines in files in a directory
 
 
+## ip
+Not currently functional, was supossed to email me with the new public IP address of a server in the case that it changes
+
 ## setup
 Massively untested, should probably setup the enviroment to use these scripts on a new machine
