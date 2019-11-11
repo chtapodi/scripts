@@ -18,7 +18,7 @@ while [[ $count -ne 0 ]] ; do
         echo "Connection succeeded"
         ((count = 1))
     else
-        echo "Connection error; retrying with count= " $count
+        echo "try = " $count
     fi
 
     ((count = count - 1))
