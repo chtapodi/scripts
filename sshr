@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+#made by nishiuramakoto @https://gist.github.com/9point6/ace9c7db75dc694d434d
+
+# Check we've got command line arguments
+if [ -z "$*" ] ; then
+    echo "Need to specify ssh options"
+    exit 1
+fi
+
+# Start trying and retrying
+((count = 100)) 
+while [[ $count -ne 0 ]] ; do
+    ssh $*
+    rc=$?
+    echo ssh exit code is $rc
+    if [[ $rc -ne 255 ]] ; then
+        echo "Connection succeeded"
+        ((count = 1))
+    else
+        echo "Connection error; retrying with count= " $count
+    fi
+
+    ((count = count - 1))
+done
+
+# Print a message if we failed
+if [[ $rc -eq 255 ]] ; then
+    echo "Could not connect to $* after 100 attempts - stopping."
+fi

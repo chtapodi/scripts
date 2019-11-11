@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [[ $1 == "-r" ]] || [[ $1 == "-h" ]] || [[ $1 == "-rh" ]] || [[ $1 == "-hr" ]]
+then
+	if [ -z $2 ]
+	then
+		loc="."
+	else
+		loc=$2
+	fi
+
+	if [ $1 == "-h" ] || [ $1 == "-rh" ] || [ $1 == "-hr" ]
+	then
+		count=$(( find $loc -print0 | xargs -0 cat  2>/dev/null ) | wc -l)
+	else
+
+		count=$(( find $loc \( ! -regex '.*/\..*' \) -print0 | xargs -0 cat 2>/dev/null) | wc -l)
+	fi
+elif [[ $1 == "--help" ]]
+then
+	echo -e "\e[32mthis script counts the number of lines in files in a directory \ndefault behavior uses the current directory\e[0m"
+	echo -e "\e[31mformat is \e[33;1m<flag> <directory>\e[0m"
+	echo -e "\t-r \t\t recursive"
+	echo -e "\t-h \t\t includes hidden directories and files"
+	echo -e "\t-hr || -rh \t does both"
+else
+	if [ -z $1 ]
+	then
+		count=$(( cat ./* 2>/dev/null) | wc -l)
+	else
+		count=$(( cat $1/* 2>/dev/null) | wc -l)
+	fi
+fi
+echo $count
