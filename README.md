@@ -1,22 +1,22 @@
 # Scripts
-## Append
+## append
 
 Running append allows you to easily add an alias to your bashrc file.
 
-## Call
+## call
 
 This is for interfacing with a Particle Photon board listening for event calls
 
-## Count
+## count
 
 This counts all of the files in a given directory.
 the -r flag will make the count recursive
 
-## Remove
+## remove
 
 This removes a given alias from the basrc file
 
-## Equiv
+## equiv
 
 A script for equalizing the files between two drives
 
