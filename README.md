@@ -20,6 +20,14 @@ This removes a given alias from the basrc file
 
 A script for equalizing the files between two drives
 
-##IP
+## sshr
 
-This should send an email when the external IP address changes
+Continuously retries ssh connection, great for when you are rebooting the device you are working on
+
+## linecount
+
+Counts the number of lines in files in a directory
+
+
+## setup
+Massively untested, should probably setup the enviroment to use these scripts on a new machine
