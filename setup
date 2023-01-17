@@ -2,6 +2,8 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 export PATH="$PATH:$DIR"
 echo "export PATH=$PATH:$DIR" >>~/.bashrc
+
+echo "alias gitgraph=\"git log --all --graph --decorate --oneline --simplify-by-decoration\"" >>~/.bashrc
 source ~/.bashrc
 
 #CASE INSENSITIVE TAB
@@ -10,3 +12,4 @@ if [ ! -a ~/.inputrc ]; then echo '$include /etc/inputrc' > ~/.inputrc; fi
 
 # Add option to ~/.inputrc to enable case-insensitive tab completion
 echo 'set completion-ignore-case On' >> ~/.inputrc
+

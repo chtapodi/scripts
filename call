@@ -7,7 +7,7 @@ then
 else
 	if [ -z $2 ]
 	then
-		curl https://api.particle.io/v1/devices/events -d "name=chtapodi" -d "data=$1" -d "private=false" -d "ttl=60" -d access_token="5e6258fe38fd74782b03e54885850847c40517d7" &> /dev/null
+		curl https://api.particle.io/v1/devices/events -d "name=chtapodiEcho" -d "data=$1" -d "private=false" -d "ttl=60" -d access_token="5e6258fe38fd74782b03e54885850847c40517d7" &> /dev/null
 		echo -e "calling \e[32m"$1"\e[0m"
 	else
 		curl https://api.particle.io/v1/devices/events -d "name=$1" -d "data=$2" -d "private=false" -d "ttl=60" -d access_token="5e6258fe38fd74782b03e54885850847c40517d7" &> /dev/null
