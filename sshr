@@ -44,17 +44,7 @@ function parse_arguments {
 
 # Function to attempt SSH connection
 function try_ssh {
-  echo "Attempting SSH connection to ${HOST}:${PORT}..."
-  if ssh -p "${PORT}" "${HOST}" ; then
-    exit 0
-  else
-    echo "SSH connection failed. Trying again after ping."
-  fi
-
-}
-
-function try_ssh {
-  ssh -p "${PORT}" "${HOST}" -o ConnectTimeout=2
+  ssh -p "${PORT}" "${HOST}" -o ConnectTimeout=5
   SSH_EXIT_STATUS=$?
   if [ ${SSH_EXIT_STATUS} -eq 0 ]; then
     exit 0
