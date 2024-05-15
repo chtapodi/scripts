@@ -1,0 +1,8 @@
+#!/bin/bash
+path="$(mktemp).png"
+gnome-screenshot -a --file="${path}"
+echo "copied to clipboard"
+# echo $path
+text=$(gocr $path)
+# echo "text is $text"
+echo "${text}" | xclip -selection clipboard
