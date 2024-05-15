@@ -1,0 +1,3 @@
+#!/bin/bash
+path="$(mktemp).png"
+gnome-screenshot -a --file="${path}" && xclip -selection clipboard -t image/png -i "${path}"
