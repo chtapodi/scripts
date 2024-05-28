@@ -1,0 +1,24 @@
+#!/bin/bash
+
+
+# Check if at least one argument is provided
+if [ $# -lt 1 ]; then
+	path="./"
+else
+	path="$1"
+fi
+
+# The first argument is used as the command
+fullpath="$(readlink -f $path)"
+
+# Shift the arguments to remove the first one
+shift
+
+# Check if the full path is a directory and ends with /
+if [ -d "$fullpath" ] && [[ "$path" == */ ]]; then
+    ls -d "${fullpath}"/* "$@"
+else
+    ls -d "${fullpath}" "$@"
+fi
+
+
