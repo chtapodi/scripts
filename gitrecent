@@ -1,0 +1,2 @@
+#!/bin/bash
+git for-each-ref --sort=-committerdate refs/heads/ --format='%(authorname) %(refname:short)' | grep -i "$(echo "$USER" | sed 's/\./ /g')" | awk '{print $3}'
