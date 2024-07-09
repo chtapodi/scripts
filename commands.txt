@@ -1,0 +1,104 @@
+## misc
+
+# Creates video movie from jpegs
+ffmpeg -framerate 10 -pattern_type glob -i '*.jpeg' -c:v libx264 -r 10 -pix_fmt yuv420p ../output.mp4
+
+# Shows the $ of memory used
+free | awk '/^Mem/ {print int(($3/$2)*100)}'
+
+
+## /misc
+
+## drones
+
+## images
+
+# watch the last full image path
+watch -n.1 "find  /data/images/*/\$(date -u +\"%Y-%m-%d_%H-%M-%S\" --date=\"\$(date -u +\"%Y-%m-%d %H:00:00\")\") -printf '%T@ %Tc %p\n' | sort -n  | tail -1 | awk '{print \$9}'"
+
+# Show average write time period of directory of files ( for viewing framerate from saved jpegs )
+echo "$(awk "BEGIN{files_count=$(find . -type f | wc -l); time_difference=$(find . -type f -exec stat --format="%Y.%N" {} \; | awk 'NR==1{min=max=$1} {if ($1<min) min=$1; if ($1>max) max=$1} END{print max - min}'); printf \"%.6f\",  time_difference / files_count }")"
+
+# Shows the difference in time (seconds) between the first and last created file in directory
+find . -type f -exec stat --format="%Y.%N" {} \; | awk 'NR==1{min=max=$1} {if ($1<min) min=$1; if ($1>max) max=$1} END{print max - min}'
+
+# Prints out the timestamps from captured jpegs from the inference-pipeline
+find . -type f | grep -oP '[0-9]+?(?=.jpeg)'
+
+# Copies the most recently taken image
+scp 129-wingtip:$(ssh 129-wingtip "find /data/images -type f -printf '%T@ %p\n' | sort -n | tail -n 1 | awk '{print \$2}'") .
+
+# Shows numbers of images in the folder in minutes@10FPS
+watch -n.5 'echo "$(echo "scale=2; 0.1*$(ls . -U | wc -l) / 60" | bc) minutes"'
+
+# Shows average frame rate per hour from data/images
+for d in $(ls /data/images/*); do echo $d; echo $((`ls /data/images/sd-129/$d | wc -l` / 3600 )) ; done;
+
+# Shows throughput values for current folder
+ls -1 | sort -t_ -k1,1n | awk -F_ '{prev = curr; curr = $3; if (prev) print curr - prev}'
+
+# Shows the last N throughput values 
+ls $(readlink -f /data/images/*/ | head -1)/$(ls /data/images/*/ -t | head -1)/ | tail | sort -t_ -k1,1n | awk -F_ '{prev = curr; curr = $3; if (prev) print curr - prev}'
+
+#watches the last N throughput values
+watch -n1 "ls \$(readlink -f /data/images/*/ | head -1)/\$(ls /data/images/*/ -t | head -1)/ | tail | sort -t_ -k1,1n | awk -F_ '{prev = curr; curr = \$3; if (prev) print curr - prev}'"
+
+# Shows the last N throughput values that are above a certain threshold
+ls $(readlink -f /data/images/*/ | head -1)/$(ls /data/images/*/ -t | head -1)/  | sort -t_ -k1,1n | awk -F_ '{prev = curr; curr = $3; if (prev) print curr - prev}' | awk -v threshold_value=150 '$1 > threshold_value { print $1 }'
+
+# prints out number of dropped frames in last hour folder
+echo $(( $(( $(find /data/images/*/$(date -u +"%Y-%m-%d_%H-%M-%S" --date="$(date -u +"%Y-%m-%d %H:00:00")") -type f -exec stat --format="%Y.%N" {} + | awk 'BEGIN{FS="."; OFS="."}{if(NR==1){min=$1; max=$1}} {if($1<min) min=$1; if($1>max) max=$1} END{print max-min}')*10 )) - $(ls /data/images/*/$(date -u +"%Y-%m-%d_%H-%M-%S" --date="$(date -u +"%Y-%m-%d %H:00:00")") | wc -l) ))
+
+#generates the latest hour folder
+date -u +"%Y-%m-%d_%H-%M-%S" --date="$(date -u +"%Y-%m-%d %H:00:00")"
+
+# efficiently shows the most recently written image
+ls -ArtR /data/images/*/$(date -u +"%Y-%m-%d_%H-%M-%S" --date="$(date -u +"%Y-%m-%d %H:00:00")") | tail -n 1
+
+# watches the most recently written image
+watch -n.5 'ls -ArtR /data/images/*/$(date -u +"%Y-%m-%d_%H-%M-%S" --date="$(date -u +"%Y-%m-%d %H:00:00")") | tail -n 1'
+
+## /images
+
+# add gateway gw add wifi
+route add default gw 192.168.1.20
+
+## ptz
+#set to tracking
+send_pequod_cmd --cmd settings_cmd camera_function_mode:FUNC_MODE_TRACKING
+
+# ptz commands
+VIDEOIFrameInterval
+VIDEOFrameRate
+VIDEOBitRate
+VIDEOCodecType
+VIDEOFormat
+VIDEOMulticastConfiguration
+VIDEOQuality
+VIDEOMulticastMode
+nexus_request action=DLTVExposureTimeGet
+
+# turn on ptz
+pb_tool --id=SWITCH_PTZ --state=true
+
+## /ptz
+
+## gps
+#set home
+launch_param_tool --notify=false --param=master.gps.simulate:1; launch_param_tool --notify=false --param=master.gps.gps.simtype:2; launch_param_tool --notify=false --param=master.gps.gps.static_lat:37.7728;  launch_param_tool --param=master.gps.gps.static_lng:-122.35
+
+# set japan
+launch_param_tool --notify=false --param=master.gps.simulate:1; launch_param_tool --notify=false --param=master.gps.gps.simtype:2; launch_param_tool --notify=false --param=master.gps.gps.static_lat:37.7728;  launch_param_tool --param=master.gps.gps.static_lng:140
+
+## /gps
+
+##/drones
+
+## rsync
+# rsync with filter file
+rsync -avz --ignore-existing --files-from=imgs.txt -e "ssh -i ~/.ssh/saildrone-vehicle.pem -J sd-3000-hull.vehicle.saildrone.com root@192.168.1.10 -o StrictHostKeyChecking=no" :/mnt/data/images/sd-3000/2024-04-05_17-00-00/ .
+
+# double rsync
+rsync -avz  --ignore-existing   -e "ssh -i ~/.ssh/saildrone-vehicle.pem -J sd-2016-hull.vehicle.saildrone.com root@192.168.1.10 -o StrictHostKeyChecking=no" :/data/images/sd-2016/2024-03-19_11-00-00 images/sd-2016/
+
+## /rsync

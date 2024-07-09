@@ -1,0 +1,38 @@
+#!/bin/bash
+# disps=$(xrandr | grep -Po '^.*(?= connected)')
+main="eDP-1"
+xrandr_string="xrandr"
+
+xrandr_string+=" --output ${main} --auto --mode 2560x1600"
+
+# locations=("above" "left" "left")
+location="above"
+
+
+last_disp="${main}"
+while IFS= read -r disp
+do
+    echo " stat"
+    echo $disp
+    # turn off disp
+    # Don't operate on laptop screen
+    if [ "${disp}" = "${main}" ]; then
+        echo "Primary display"
+    else 
+        xrandr --output $disp --off
+
+        if [ "${last_disp}" = "${main}" ]; then
+            location="above"
+        else 
+            location="left-of"
+        fi
+
+
+        xrandr_string+=" --output ${disp} --auto --mode 2560x1440 --${location} ${last_disp}"
+        last_disp=$disp
+    fi
+    
+done < <(xrandr | grep -Po '^.*(?= connected)')
+
+eval "${xrandr_string}"
+feh --randomize --bg-fill ~/Pictures/wallpapers/*

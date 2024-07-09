@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+import argparse
+from datetime import datetime
+from dateutil.parser import parse
+from dateutil.parser import parse
+from dateutil.tz import tzutc, tzlocal
+import pytz
+
+def convert_date_to_epoch_ms(date_str, tz='UTC'):
+    """
+    Convert a date string in any format to the time since epoch in milliseconds.
+    
+    Converts the input date string to UTC first if it's not already in UTC.
+    
+    :param date_str: Date string in any format.
+    :param tz: Timezone to assume for offset-naive dates, default is 'UTC'.
+    :return: Time since epoch in milliseconds.
+    """
+    # Parse the date string to a datetime object
+    date_obj = parse(date_str)
+    
+    # Check if the parsed date is in UTC
+    if date_obj.tzinfo and date_obj.tzinfo.utcoffset(date_obj) is None:
+        # If the date is already in UTC, no conversion is needed
+        ...
+    else:
+        # If the date is not in UTC, convert it to UTC
+        if date_obj.tzinfo:
+            # If the date is offset-aware but not in UTC, convert it to UTC
+            date_obj = date_obj.astimezone(pytz.UTC)
+        else:
+            # If the date is offset-naive, make it offset-aware in UTC
+            date_obj = date_obj.replace(tzinfo=pytz.UTC)
+
+    
+    # Now proceed with the calculation as before, knowing the date is in UTC
+    epoch = datetime(1970, 1, 1, tzinfo=pytz.UTC)
+    
+    # Calculate the time since epoch in seconds
+    epoch_time_seconds = (date_obj - epoch).total_seconds()
+    
+    # Convert seconds to milliseconds
+    epoch_time_ms = int(epoch_time_seconds * 1000)
+    
+    return epoch_time_ms
+
+def main():
+    # Create the parser
+    parser = argparse.ArgumentParser(description="Convert a date string to time since epoch in milliseconds.")
+    
+    # Add an argument
+    parser.add_argument('date', type=str, nargs='+', help='Date string in any format')
+    
+    # Parse the arguments
+    args = parser.parse_args()
+    
+    # Join the arguments if there are multiple parts
+    date_str = ' '.join(args.date)
+    # Call the conversion function with the joined date string
+    epoch_time_ms = convert_date_to_epoch_ms(date_str)
+    
+    print(f"{epoch_time_ms}")
+
+if __name__ == "__main__":
+    main()

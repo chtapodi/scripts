@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Define a hash table
+declare -A devices=([m3]="00:1B:66:E0:48:DD" [m4]="80:C3:BA:29:E7:3C" [buds]="AC:3E:B1:9E:34:87")
+
+# Function to display help
+display_help() {
+    echo "Usage: $0 [-h] [-d] tag"
+    echo
+    echo "Options:"
+    echo " -h    Display this help message."
+    echo " -d    Disconnect from the device."
+    echo " name The name to find the hash for."
+    echo
+    echo "Example:"
+    echo " $0 m3"
+    echo " $0 -d m3"
+}
+
+command="connect"
+
+# Parse flags
+while getopts ":h:d" opt; do
+ case ${opt} in
+    h )
+      display_help
+      exit 0
+      ;;
+    d )
+      command="disconnect"
+      ;;
+    \? )
+      echo "Invalid Option: -$OPTARG" 1>&2
+      display_help
+      exit 1
+      ;;
+ esac
+done
+shift $((OPTIND -1))
+
+# Check if a name was provided
+if [ $# -eq 0 ]; then
+    echo "Error: No name provided."
+    display_help
+    exit 1
+fi
+
+# Get the name from the arguments
+name=$1
+
+
+# Find and print the hash value
+if [ -n "${devices[$name]}" ]; then
+    echo "${command}ing $name..."
+    bluetoothctl "${command}" ${devices[$name]}
+else
+    echo "Error: Name not found."
+    exit 1
+fi

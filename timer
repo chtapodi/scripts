@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+
+
+N=120
+# if $1 is set, use it as the countdown number
+if [ -n "$1" ]; then
+    init_value=$1
+    N=$init_value
+fi
+
+
+while [[ $((--N)) > 0 ]]; do echo -ne "$(printf '\r%02d' $N)"; sleep 1; done; echo -e "\a"
+
+DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/$(id -u) /usr/bin/dunstify -u critical "Timer done!" "${init_value} second timer"

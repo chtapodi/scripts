@@ -1,0 +1,5 @@
+#!/bin/bash
+
+search="${@}"
+
+google-chrome --incognito --kiosk --app="https://www.phind.com/search?q=${search}&searchMode=auto"
