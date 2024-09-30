@@ -8,13 +8,20 @@ in_category=false
 reading_command=false
 print_next=false
 category=""
+already_printed=false
+
+
+commands_file="$(dirname $0)/commands.txt"
 
 echo -e "\n"
 while IFS= read -r line; do
+    already_printed=false
     # Check if the line is a category header
     if [[ $line == "## "* ]] && [[ $line == *"$search_string"* ]]; then
         in_category=true
         echo "$line"
+        already_printed=true
+
         # category="${line#?? }" # Remove '## ' prefix to get the category name
         # reading_command=false # Reset reading state for new category
     elif [[ $line == "#"* ]]; then
@@ -25,6 +32,7 @@ while IFS= read -r line; do
         else
             if $in_category; then
                 echo "$line"
+                already_printed=true
             fi
             continue # Skip printing the description if the search string is not found
         fi
@@ -35,9 +43,13 @@ while IFS= read -r line; do
         if $print_next; then
             echo "$line"
             print_next=false
+            already_printed=true
+
             echo -e "\n"
         elif $in_category; then
             echo "$line"
+            already_printed=true
+
         fi
         # reset echo color
         echo -en "\e[0m"
@@ -64,4 +76,9 @@ while IFS= read -r line; do
         echo "rc $line"
     fi
 
-done < "commands.txt"
+
+    if [[ $already_printed != true ]]; then
+        echo "$line" | grep "$search_string"
+    fi
+
+done < $commands_file

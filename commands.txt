@@ -3,13 +3,56 @@
 # Creates video movie from jpegs
 ffmpeg -framerate 10 -pattern_type glob -i '*.jpeg' -c:v libx264 -r 10 -pix_fmt yuv420p ../output.mp4
 
+# Creates video from jpegs, maybe higher quality
+ffmpeg -framerate 10 -pattern_type glob -i '*.jpeg' -c:v libx264 -profile:v high444 -refs 16   -r 10  ../output.mp4
+
+
 # Shows the $ of memory used
 free | awk '/^Mem/ {print int(($3/$2)*100)}'
+
+# convert dot files pipeline graph
+for file in *.dot; do dot -Tpng "$file" > "${file%.dot}.png"; done
+
+# adds dot dir to pipeline for graphing
+GST_DEBUG_DUMP_DOT_DIR=/tmp/
+
+
+#averages input numbers
+| awk '{ total += \$1 } END { print total/NR }'
+
+
+
+# Port forward example
+ssh  -NL 8888:192.168.1.8:80 sd-2032-hull.vehicle.saildrone.com
+
+# Double port forwarding example
+ssh -i ~/.ssh/saildrone-vehicle.pem -NL 8888:192.168.1.8:80 sd-2036-hull.vehicle.saildrone.com
 
 
 ## /misc
 
 ## drones
+
+## inference-pipeline
+
+# run pipeline
+export USE_NEW_NVSTREAMMUX=yes /usr/local/bin/inference_pipeline /etc/ptz/pipeline_config.yml
+
+# graph pipeline
+export USE_NEW_NVSTREAMMUX=yes; GST_DEBUG_DUMP_DOT_DIR=/tmp/ /usr/local/bin/inference_pipeline /etc/ptz/pipeline_config.yml --graph_pipeline=true
+
+# Number of restarts
+systemctl show inference-pipeline -p NRestarts
+
+
+## /inference-pipeline
+
+
+# wingtip power 
+pb_tool --id=SWITCH_ARGUS_WINGTIP --get
+
+# log and show wingtip power
+while true; do pb_tool --id=SWITCH_ARGUS_WINGTIP --get | grep Power | grep -o [0-9]*\\.[0-9]*; date; sleep .1; done  | tee -a power_log.txt
 
 ## images
 
@@ -37,13 +80,25 @@ for d in $(ls /data/images/*); do echo $d; echo $((`ls /data/images/sd-129/$d | 
 # Shows throughput values for current folder
 ls -1 | sort -t_ -k1,1n | awk -F_ '{prev = curr; curr = $3; if (prev) print curr - prev}'
 
-# Shows the last N throughput values 
+# Shows the last N throughput values/framerate
 ls $(readlink -f /data/images/*/ | head -1)/$(ls /data/images/*/ -t | head -1)/ | tail | sort -t_ -k1,1n | awk -F_ '{prev = curr; curr = $3; if (prev) print curr - prev}'
 
-#watches the last N throughput values
+#watches the last N throughput values/framerate 
 watch -n1 "ls \$(readlink -f /data/images/*/ | head -1)/\$(ls /data/images/*/ -t | head -1)/ | tail | sort -t_ -k1,1n | awk -F_ '{prev = curr; curr = \$3; if (prev) print curr - prev}'"
 
-# Shows the last N throughput values that are above a certain threshold
+
+#watches the last N throughput values/framerate in curr folder
+watch -n1 "ls | tail | sort -t_ -k1,1n | awk -F_ '{prev = curr; curr = \$3; if (prev) print curr - prev}'"
+
+
+# Shows the last N throughput values from timestamps, naming does not matter, agnostic
+ls -rt | tail -n 11 | xargs -I {} stat --format="%.Y" {} |  awk -F_ '{prev = curr; curr = $1; if (prev) print (curr - prev)*1000}'
+
+# watches the last N throughput values from timestamps, naming does not matter, agnostic
+watch -n.1 "ls -rt | tail -n 51 | xargs -I {} stat --format='%.Y' {} |  awk -F_ '{prev = curr; curr = \$1; if (prev) print (curr - prev)*1000}'"
+
+
+# Shows the last N throughput values that are above a certain threshold/framerate
 ls $(readlink -f /data/images/*/ | head -1)/$(ls /data/images/*/ -t | head -1)/  | sort -t_ -k1,1n | awk -F_ '{prev = curr; curr = $3; if (prev) print curr - prev}' | awk -v threshold_value=150 '$1 > threshold_value { print $1 }'
 
 # prints out number of dropped frames in last hour folder
@@ -60,8 +115,11 @@ watch -n.5 'ls -ArtR /data/images/*/$(date -u +"%Y-%m-%d_%H-%M-%S" --date="$(dat
 
 ## /images
 
-# add gateway gw add wifi
+# add gateway gw add wifi on bench drone
 route add default gw 192.168.1.20
+ip route del default via 192.168.1.21 dev eth0; sudo ip route add default via 192.168.1.20
+
+
 
 ## ptz
 #set to tracking
@@ -77,7 +135,10 @@ VIDEOMulticastConfiguration
 VIDEOQuality
 VIDEOMulticastMode
 nexus_request action=DLTVExposureTimeGet
-
+nexus_request action=SERVERFirmwareVersionGet,tokenoverride=1
+nexus_request action=VIDEOFrameRateSet,DeviceID=2,Rate=5,tokenoverride=1
+nexus_request action=VIDEOFrameRateGet,DeviceID=2
+nexus_request action=SERVERSystemReboot,Delay=5,tokenoverride=1
 # turn on ptz
 pb_tool --id=SWITCH_PTZ --state=true
 

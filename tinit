@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Check if the user passed an argument, otherwise print an error and exit
+if [ -z "$1" ]; then
+  echo "Error: You must provide a session ID as an argument."
+  echo "Usage: $0 <session_id>"
+  exit 1
+fi
+
+# Use the provided argument as the session ID
+ID="$1"
+
+# Check if the tmux session with the given ID already exists
+tmux has-session -t "$ID" 2>/dev/null
+
+# If the session exists, attach to it and exit
+if [ $? -eq 0 ]; then
+  echo "Attaching to existing session '$ID'."
+  tmux attach-session -t "$ID"
+  exit 0
+fi
+
+# If the session does not exist, create a new one
+echo "Creating a new session '$ID'."
+tmux new-session -d -s "$ID"
+
+# Split the window into top and bottom
+tmux split-window -v -t "$ID"
+
+# Split the left (top) pane into left and right
+tmux split-window -h -l 60% -t "$ID:0.0"
+
+# Split the right (bottom) pane into left and right
+tmux split-window -h -t "$ID:0.2"
+
+# Split the bottom-right pane into top and bottom
+tmux split-window -v -l 50% -t "$ID:0.3"
+
+# Commands for each pane (you can modify these to suit your needs)
+tmux send-keys -t "$ID:0.0" "dronectl -y -i ${ID}" C-m # Top left
+#tmux send-keys -t "$ID:0.1" "dronectl -y -i ${ID}" C-m # Top right
+tmux send-keys -t "$ID:0.2" "dronectl -y -i ${ID}" C-m # Bottom left
+tmux send-keys -t "$ID:0.3" "dronectl -y -i ${ID}h" C-m # Bottom right top
+tmux send-keys -t "$ID:0.4" "ssh  -NL 8888:192.168.1.8:80 \$(idtodrone ${ID})" C-m # Bottom right bottom
+
+# Attach to the newly created session
+tmux attach-session -t "$ID"

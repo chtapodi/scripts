@@ -1,16 +1,53 @@
 #!/bin/bash
 
-
-
-
+# Default value in seconds
 N=120
-# if $1 is set, use it as the countdown number
+minutes_mode=false
+
+# Parse options
+while getopts ":m" opt; do
+  case $opt in
+    m)
+      minutes_mode=true
+      ;;
+    *)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Shift arguments to handle positional parameter after options
+shift $((OPTIND -1))
+
+# If $1 is set, use it as the countdown number
 if [ -n "$1" ]; then
     init_value=$1
+    # Check if input ends with 'm' indicating minutes
+    if [[ $init_value =~ ^[0-9]+m$ ]]; then
+        init_value=${init_value%m}
+        minutes_mode=true
+    fi
     N=$init_value
 fi
 
+# Convert to seconds if -m flag is set or if input indicates minutes
+if $minutes_mode; then
+    N=$((N * 60))
+    timer_type="minute"
+else
+    timer_type="second"
+fi
 
-while [[ $((--N)) > 0 ]]; do echo -ne "$(printf '\r%02d' $N)"; sleep 1; done; echo -e "\a"
+# Start countdown
+while [[ $N -gt 0 ]]; do
+    minutes=$((N / 60))
+    seconds=$((N % 60))
+    echo -ne "\r\033[K${minutes}m ${seconds}s (${N}s)"  # \033[K clears the line after the cursor
+    sleep 1
+    ((N--))
+done
 
-DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/$(id -u) /usr/bin/dunstify -u critical "Timer done!" "${init_value} second timer"
+# Timer finished notification
+echo -e "\a"
+DISPLAY=:0.0 XDG_RUNTIME_DIR=/run/user/$(id -u) /usr/bin/dunstify -u critical "Timer done!" "${init_value} $timer_type timer"

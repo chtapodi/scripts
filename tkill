@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+# Check if any arguments were passed
+if [ "$#" -eq 0 ]; then
+  echo "Usage: $0 [arg1 arg2 ... argN]"
+  echo "Pass one or more arguments to be processed."
+  exit 1
+fi
+
+echo FI
+# Iterate over all the arguments
+for arg in "$@"; do
+  echo "tmux kill-session -t $arg"
+  tmux kill-session -t "$arg"
+done

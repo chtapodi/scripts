@@ -1,0 +1,12 @@
+#!/bin/bash
+
+NAME=${1:-"default"};
+if ! [ -z "$TMUX" ];
+then
+    tmux switch-client -t "${NAME}" || tmux new -s -d "$NAME"; tmux switch-client -t "${NAME}"
+else
+    tmux attach -t "$NAME" || tmux new -s "$NAME";
+fi
+
+
+
